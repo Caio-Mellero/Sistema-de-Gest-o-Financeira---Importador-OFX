@@ -22,7 +22,6 @@ public class SistemaFinancasApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         File arquivo = new File("C:/Users/caiom/Downloads/EXTRATO_NOVEMBRO_NUBANK.ofx");
-
         if (arquivo.exists()) {
             transacaoService.importarOFX(new FileInputStream(arquivo));
             System.out.println("Processamento concluído!");
