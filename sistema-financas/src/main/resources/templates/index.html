@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Finanças</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .money-card { transition: transform 0.2s; }
+        .money-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <h2 class="mb-4">Dashboard Financeiro</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow money-card">
+                <div class="card-body">
+                    <h6>Total Entradas</h6>
+                    <h3 th:text="${'R$ ' + (totalEntradas ?: '0.00')}">R$ 0.00</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-danger text-white shadow money-card">
+                <div class="card-body">
+                    <h6>Total Saídas</h6>
+                    <h3 th:text="${'R$ ' + (totalSaidas ?: '0.00')}">R$ 0.00</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow money-card">
+                <div class="card-body">
+                    <h6>Saldo Atual</h6>
+                    <h3 th:text="${'R$ ' + (saldo ?: '0.00')}">R$ 0.00</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-white fw-bold">Importar Novo Extrato (.OFX)</div>
+        <div class="card-body">
+            <form th:action="@{/importar}" method="post" enctype="multipart/form-data" class="row g-3">
+                <div class="col-auto">
+                    <input type="file" name="arquivo" class="form-control" accept=".ofx" required>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-dark">Importar Agora</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${mensagem}" class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+        <span th:text="${mensagem}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th class="ps-4">Data</th>
+                    <th>Categoria / Detalhes</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                    <th class="text-center">Ação</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="t : ${transacoes}">
+                    <td class="ps-4" th:text="${#temporals.format(t.data, 'dd/MM/yyyy')}"></td>
+                    <td>
+                        <strong class="text-primary d-block" th:text="${t.categoria != null ? t.categoria : 'Pendente'}"></strong>
+                        <small class="text-muted" th:text="${t.descricao}"></small>
+                    </td>
+                    <td>
+                        <span th:text="${t.tipo}"
+                              th:class="${t.tipo.name() == 'ENTRADA' ? 'badge bg-success' : 'badge bg-danger'}">
+                        </span>
+                    </td>
+                    <td th:text="'R$ ' + ${t.valor}" th:class="${t.valor < 0 ? 'text-danger fw-bold' : 'text-success fw-bold'}"></td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                data-bs-toggle="modal"
+                                th:data-bs-target="'#modal' + ${t.id}">
+                            Classificar
+                        </button>
+                    </td>
+
+                    <div class="modal fade" th:id="'modal' + ${t.id}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form th:action="@{/atualizar-categoria}" method="post">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Definir Categoria</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-start">
+                                        <input type="hidden" name="id" th:value="${t.id}">
+                                        <p class="text-muted small">Transação: <span th:text="${t.descricao}"></span></p>
+
+                                        <label class="form-label fw-bold">Selecione a Categoria:</label>
+                                        <select name="novaCategoria" class="form-select">
+                                            <option th:each="cat : ${categoriasPreset}"
+                                                    th:value="${cat}"
+                                                    th:text="${cat}"
+                                                    th:selected="${cat == t.categoria}"></option>
+                                        </select>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-link text-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary">Salvar Alteração</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
