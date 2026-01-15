@@ -4,404 +4,448 @@
     <meta charset="UTF-8">
     <title>Dashboard Financeiro</title>
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Fonte Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-<style>
-    /* === Base === */
-    body {
-        background-color: #0d0d0f;
-        color: #e5e5e5;
-        font-family: 'Inter', sans-serif;
-    }
+    <style>
+        :root {
+            --bg-body: #09090b;
+            --bg-card: #18181b;
+            --bg-card-hover: #27272a;
+            --border-color: #27272a;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --accent-color: #3b82f6;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+        }
 
-    /* === Cards === */
-    .card-dark {
-        background-color: #16161a;
-        border: 1px solid #1f1f23;
-        border-radius: 12px;
-        color: #f0f0f0;
-        transition: transform .2s, box-shadow .2s;
-    }
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    .card-dark:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 0 20px rgba(0, 150, 255, 0.08);
-    }
+        /* === Header & Titles === */
+        .app-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            background: rgba(9, 9, 11, 0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
 
-    .card-dark small {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: #cccccc;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-    }
+        h2 { font-weight: 600; letter-spacing: -0.5px; }
 
+        /* === Cards === */
+        .card-dark {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
 
-    /* === Tabela === */
-    .table-dark-custom {
-        background-color: #16161a;
-        border-radius: 8px;
-        overflow: hidden;
-    }
+        .card-dark:hover {
+            border-color: #3f3f46;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
 
-    .table-dark-custom thead {
-        background-color: #1f1f23;
-    }
+        /* Destaque para o Card de Saldo */
+        .card-highlight {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            border: none;
+            color: white;
+        }
+        .card-highlight .text-muted { color: rgba(255,255,255, 0.7) !important; }
+        .card-highlight h3, .card-highlight i { color: white !important; }
 
-    .table-dark-custom thead th {
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #ffffff;
-        background-color: #1f1f23;
-        border-bottom: 1px solid #2a2a2d;
-        padding: 12px 16px;
-    }
+        .card-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
 
-    .table-dark-custom tbody tr:nth-child(odd) {
-        background-color: #1a1a1d;
-    }
+        .card-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin: 0;
+        }
 
-    .table-dark-custom tbody tr:nth-child(even) {
-        background-color: #141416;
-    }
+        /* === Tabela === */
+        .table-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
 
-    .table-dark-custom tbody tr:hover {
-        background-color: #222226;
-    }
+        .table-custom {
+            width: 100%;
+            margin-bottom: 0;
+            color: var(--text-primary);
+        }
 
-    .table-dark-custom td {
-        color: #f0f0f0 !important;
-        border-color: #2a2a2d !important;
-        padding: 12px 16px;
-        vertical-align: middle;
-    }
+        .table-custom th {
+            background-color: #202024;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
 
-    .table-dark-custom tbody tr {
-        border-bottom: 1px solid #2a2a2d;
-    }
+        .table-custom td {
+            padding: 1.25rem 1.5rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
 
-    .table-dark-custom .text-muted {
-        color: #f0f0f0 !important;
-    }
+        .table-custom tr:last-child td { border-bottom: none; }
+        .table-custom tr:hover td { background-color: var(--bg-card-hover); }
 
-    /* === Botões === */
-    .btn-primary {
-        background-color: #0066ff;
-        border: none;
-    }
+        /* === Actions Buttons (Minimalist) === */
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
 
-    .btn-primary:hover {
-        background-color: #0052cc;
-    }
+        .btn-icon:hover {
+            background-color: #27272a;
+            color: var(--text-primary);
+            border-color: #3f3f46;
+        }
+        .btn-icon-danger:hover { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); border-color: transparent; }
 
-    .btn-outline-primary {
-        border-color: #0066ff;
-        color: #0066ff;
-    }
+        /* === Badges & Status === */
+        .badge-soft {
+            padding: 0.35em 0.8em;
+            font-weight: 600;
+            border-radius: 999px;
+            font-size: 0.75rem;
+        }
+        .badge-entrada { background-color: rgba(16, 185, 129, 0.15); color: var(--success-color); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-saida { background-color: rgba(239, 68, 68, 0.15); color: var(--danger-color); border: 1px solid rgba(239, 68, 68, 0.2); }
 
-    .btn-outline-primary:hover {
-        background-color: #0066ff;
-        color: white;
-    }
+        /* === Buttons === */
+        .btn-primary {
+            background-color: var(--accent-color);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 500;
+            border-radius: 8px;
+        }
+        .btn-primary:hover { background-color: #2563eb; }
 
-    /* === Badges === */
-    .badge-entrada {
-        background-color: #0f9d58;
-        color: #fff;
-    }
+        /* === Modal === */
+        .modal-content {
+            background-color: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 16px;
+        }
+        .modal-header, .modal-footer { border-color: #27272a; }
+        .form-control, .form-select {
+            background-color: #09090b;
+            border: 1px solid #27272a;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        .form-control:focus {
+            background-color: #09090b;
+            border-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
 
-    .badge-saida {
-        background-color: #d93025;
-        color: #fff;
-    }
-
-    /* === Modal === */
-    .modal-content {
-        background-color: #202024;
-        border: 1px solid #2a2a2f;
-        color: #f0f0f0;
-    }
-
-    .modal-content label,
-    .modal-content .form-control,
-    .modal-content .form-select,
-    .modal-content .modal-title {
-        color: #f0f0f0;
-    }
-
-    .modal-body .text-muted small{
-        color: #f0f0f0;
-    }
-
-    /* === Tabs === */
-    .nav-tabs .nav-link {
-        color: #aaa;
-    }
-
-    .nav-tabs .nav-link.active {
-        background-color: #1f1f23;
-        color: #fff;
-        border: none;
-    }
-
-    .card-dark small {
-        color: #ffffff !important;
-    }
-
-    /* === Formulários === */
-    .form-control,
-    .form-select {
-        background-color: #1f1f23;
-        border: 1px solid #2a2a2f;
-        color: #e5e5e5;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        background-color: #1f1f23;
-        border-color: #0066ff;
-        color: #fff;
-        box-shadow: none;
-    }
-</style>
+        /* Text Helpers */
+        .text-amount-positive { color: var(--success-color); font-weight: 600; }
+        .text-amount-negative { color: var(--danger-color); font-weight: 600; }
+    </style>
 </head>
 
 <body>
 
-<div class="container mt-5">
-
-    <h2 class="mb-4 fw-bold">Dashboard Financeiro</h2>
-
-    <!-- CARDS -->
-    <div class="row mb-4">
-
-        <div class="col-md-4">
-            <div class="card card-dark p-3">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-arrow-down-circle text-success fs-2 me-3"></i>
-                    <div>
-                        <small class="text-muted">Total de Entradas</small>
-                        <h3 th:text="${totalEntradasFmt}"></h3>
-                    </div>
-                </div>
-            </div>
+<nav class="navbar navbar-expand-lg navbar-dark border-bottom border-secondary mb-4" style="background-color: #16161a;">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">Minhas Finanças</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">Lançamentos</a> </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Gráficos & Análise</a>
+                </li>
+            </ul>
         </div>
-
-        <div class="col-md-4">
-            <div class="card card-dark p-3">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-arrow-up-circle text-danger fs-2 me-3"></i>
-                    <div>
-                        <small class="text-muted">Total de Saídas</small>
-                        <h3 th:text="${totalSaidasFmt}"></h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card card-dark p-3">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-wallet2 text-primary fs-2 me-3"></i>
-                    <div>
-                        <small class="text-muted">Saldo Atual</small>
-                        <h3 th:text="${saldoFmt}"></h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
+</nav>
 
-    <!-- BOTÃO INCLUIR -->
-    <div class="text-end mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalIncluir">
-            <i class="bi bi-plus-lg"></i> Incluir Lançamento
+<div class="app-header">
+    <div class="container d-flex justify-content-between align-items-center">
+        <h4 class="m-0 fw-bold"><i class="bi bi-wallet-fill text-primary me-2"></i>Finanças</h4>
+        <div class="d-flex align-items-center gap-2">
+            <span class="text-secondary small">Bem-vindo</span>
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                US
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container pb-5">
+
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="mb-1">Visão Geral</h2>
+            <p class="text-secondary m-0">Acompanhe seu fluxo de caixa mensal.</p>
+        </div>
+        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#modalIncluir">
+            <i class="bi bi-plus-lg me-1"></i> Nova Transação
         </button>
     </div>
 
-    <!-- ALERTA -->
-    <div th:if="${mensagem}" class="alert alert-info alert-dismissible fade show" role="alert">
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-4">
+            <div class="card-dark">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="card-label">Entradas</span>
+                        <h3 class="card-value" th:text="${totalEntradasFmt}">R$ 0,00</h3>
+                    </div>
+                    <div class="p-2 rounded bg-opacity-10 bg-success text-success">
+                        <i class="bi bi-arrow-down-left fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-dark">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="card-label">Saídas</span>
+                        <h3 class="card-value" th:text="${totalSaidasFmt}">R$ 0,00</h3>
+                    </div>
+                    <div class="p-2 rounded bg-opacity-10 bg-danger text-danger">
+                        <i class="bi bi-arrow-up-right fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card-dark card-highlight">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="card-label text-white-50">Saldo Total</span>
+                        <h3 class="card-value text-white" th:text="${saldoFmt}">R$ 0,00</h3>
+                    </div>
+                    <div class="p-2 rounded bg-white bg-opacity-25 text-white">
+                        <i class="bi bi-wallet2 fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div th:if="${mensagem}" class="alert alert-success alert-dismissible fade show border-0 bg-opacity-10 bg-success text-success" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
         <span th:text="${mensagem}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- TABELA sem modal-->
-    <div class="card card-dark p-0">
-        <table class="table-dark-custom table-hover mb-0 align-middle">
+    <div class="table-container">
+        <table class="table-custom">
             <thead>
             <tr>
-                <th class="ps-4">Data</th>
-                <th>Categoria / Detalhes</th>
-                <th>Tipo</th>
+                <th>Data</th>
+                <th>Categoria / Descrição</th>
+                <th>Status</th>
                 <th>Valor</th>
-                <th class="text-center">Ação</th>
+                <th class="text-end">Ações</th>
             </tr>
             </thead>
 
             <tbody>
             <tr th:each="t : ${transacoes}">
-                <td class="ps-4" th:text="${#temporals.format(t.data, 'dd/MM/yyyy')}"></td>
+                <td class="text-secondary" th:text="${#temporals.format(t.data, 'dd/MM/yyyy')}"></td>
 
                 <td>
-                    <strong class="text-primary d-block" th:text="${t.categoria ?: 'Pendente'}"></strong>
-                    <small class="text-muted" th:text="${t.descricao}"></small>
-                </td>
-
-                <td>
-                <span th:text="${t.tipo}"
-                      th:classappend="${t.tipo.name() == 'ENTRADA' ? 'badge badge-entrada' : 'badge badge-saida'}"
-                      class="badge">
-                </span>
-                </td>
-
-                <td th:text="${'R$ ' + t.valor}"
-                    th:classappend="${t.valor < 0} ? 'text-danger fw-bold' : 'text-success fw-bold'">
-                </td>
-
-                <td class="text-end">
-                    <div class="d-inline-flex gap-2 align-items-center flex-nowrap">
-
-                        <!-- Classificar -->
-                        <button type="button"
-                                class="btn btn-outline-primary btn-sm px-2 py-1"
-                                data-bs-toggle="modal"
-                                th:data-bs-target="|#modal${t.id}|"
-                                title="Classificar">
-                            <i class="bi bi-tags fs-4"></i>
-                        </button>
-
-                        <!-- Apagar -->
-                        <form th:action="@{'/apagar/' + ${t.id}}" method="post" class="m-0">
-                            <button type="submit"
-                                    class="btn btn-outline-danger btn-sm px-2 py-1"
-                                    onclick="return confirm('Tem certeza que deseja apagar esta transação?')"
-                                    title="Apagar">
-                                <i class="bi bi-trash fs-4"></i>
-                            </button>
-                        </form>
-
+                    <div class="d-flex flex-column">
+                        <span class="fw-medium text-white" th:text="${t.categoria ?: 'Não categorizado'}"></span>
+                        <span class="small text-secondary" th:text="${t.descricao}"></span>
                     </div>
                 </td>
 
+                <td>
+                    <span th:text="${t.tipo}"
+                          th:classappend="${t.tipo.name() == 'ENTRADA' ? 'badge-entrada' : 'badge-saida'}"
+                          class="badge-soft">
+                    </span>
+                </td>
+
+                <td th:text="${'R$ ' + t.valor}"
+                    th:classappend="${t.valor < 0} ? 'text-amount-negative' : 'text-amount-positive'">
+                </td>
+
+                <td class="text-end">
+                    <button type="button"
+                            class="btn-icon"
+                            data-bs-toggle="modal"
+                            th:data-bs-target="|#modal${t.id}|"
+                            title="Classificar">
+                        <i class="bi bi-pencil-square fs-6"></i>
+                    </button>
+
+                    <form th:action="@{'/apagar/' + ${t.id}}" method="post" class="d-inline-block m-0">
+                        <button type="submit"
+                                class="btn-icon btn-icon-danger"
+                                onclick="return confirm('Apagar este registro?')"
+                                title="Apagar">
+                            <i class="bi bi-trash fs-6"></i>
+                        </button>
+                    </form>
+                </td>
+
+            </tr>
+            <tr th:if="${#lists.isEmpty(transacoes)}">
+                <td colspan="5" class="text-center py-5 text-secondary">
+                    <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                    Nenhum lançamento encontrado.
+                </td>
             </tr>
             </tbody>
         </table>
     </div>
-    <!-- Modal Classificar-->
-    <div th:each="t : ${transacoes}">
-        <div class="modal fade" th:id="|modal${t.id}|" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
+</div>
 
-                    <form th:action="@{/atualizar-categoria}" method="post">
-
-                        <div class="modal-header">
-                            <h5 class="modal-title">Definir Categoria</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-
-                        <div class="modal-body">
-                            <input type="hidden" name="id" th:value="${t.id}">
-
-                            <p class="text-muted small">
-                                <span th:text="${t.descricao ?: 'Sem descrição'}"></span>
-                            </p>
-
-                            <label class="form-label">Categoria</label>
-                            <select name="novaCategoria" class="form-select">
-                                <option th:each="cat : ${categoriasPreset}"
-                                        th:value="${cat}"
-                                        th:text="${cat}"
-                                        th:selected="${cat == t.categoria}">
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Salvar</button>
-                        </div>
-
-                    </form>
-
-                </div>
+<div th:each="t : ${transacoes}">
+    <div class="modal fade" th:id="|modal${t.id}|" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form th:action="@{/atualizar-categoria}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Editar Categoria</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" th:value="${t.id}">
+                        <p class="text-secondary mb-3 small">
+                            Lançamento: <strong class="text-white" th:text="${t.descricao}"></strong>
+                        </p>
+                        <label class="form-label text-secondary small text-uppercase fw-bold">Selecione a Categoria</label>
+                        <select name="novaCategoria" class="form-select">
+                            <option th:each="cat : ${categoriasPreset}"
+                                    th:value="${cat}"
+                                    th:text="${cat}"
+                                    th:selected="${cat == t.categoria}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary border-0" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary px-4">Salvar Alterações</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <!-- Modal Incluir -->
+</div>
+
 <div class="modal fade" id="modalIncluir" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-
             <div class="modal-header">
-                <h5 class="modal-title">Novo Lançamento</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title fw-bold">Novo Lançamento</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
             <div class="modal-body">
-
-                <ul class="nav nav-tabs mb-3">
+                <ul class="nav nav-pills mb-4 nav-fill bg-dark rounded p-1" style="border: 1px solid #27272a;">
                     <li class="nav-item">
-                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabImportar">Importar Extrato</button>
+                        <button class="nav-link active rounded py-2" data-bs-toggle="tab" data-bs-target="#tabImportar">Importar OFX</button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabManual">Lançar Manualmente</button>
+                        <button class="nav-link rounded py-2 text-secondary" data-bs-toggle="tab" data-bs-target="#tabManual">Manual</button>
                     </li>
                 </ul>
 
                 <div class="tab-content">
-
-                    <!-- Importar -->
                     <div class="tab-pane fade show active" id="tabImportar">
                         <form th:action="@{/importar}" method="post" enctype="multipart/form-data">
-                            <input type="file" name="arquivo" class="form-control mb-3" accept=".ofx" required>
-                            <button class="btn btn-primary w-100">Importar</button>
+                            <div class="mb-4 text-center py-4 border border-dashed rounded" style="border-color: #3f3f46 !important;">
+                                <i class="bi bi-cloud-upload fs-1 text-secondary mb-2 d-block"></i>
+                                <label for="fileUpload" class="btn btn-sm btn-outline-primary">Escolher arquivo .OFX</label>
+                                <input id="fileUpload" type="file" name="arquivo" class="d-none" accept=".ofx" required onchange="this.previousElementSibling.innerText = this.files[0].name">
+                            </div>
+                            <button class="btn btn-primary w-100 py-2">Processar Importação</button>
                         </form>
                     </div>
 
-                    <!-- Manual -->
                     <div class="tab-pane fade" id="tabManual">
                         <form th:action="@{/lancar-manualmente}" method="post">
-
-                            <label class="mt-2">Data</label>
-                            <input type="date" name="data" class="form-control" required>
-
-                            <label class="mt-3">Categoria</label>
-                            <select name="categoria" class="form-select" required>
-                                <option th:each="cat : ${categoriasPreset}"
-                                        th:value="${cat}"
-                                        th:text="${cat}">
-                                </option>
-                            </select>
-
-                            <label class="mt-3">Descrição</label>
-                            <input type="text" name="descricao" class="form-control" required>
-
-                            <label class="mt-3">Tipo</label>
-                            <select name="tipo" class="form-select" required>
-                                <option value="ENTRADA">Entrada</option>
-                                <option value="SAIDA">Saída</option>
-                            </select>
-
-                            <label class="mt-3">Valor</label>
-                            <input type="number" step="0.01" name="valor" class="form-control" required>
-
-                            <button class="btn btn-primary w-100 mt-3">Salvar</button>
-                            </form>
-                        </div>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary">Data</label>
+                                    <input type="date" name="data" class="form-control" required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary">Valor</label>
+                                    <input type="number" step="0.01" name="valor" class="form-control" placeholder="0,00" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small text-secondary">Descrição</label>
+                                    <input type="text" name="descricao" class="form-control" placeholder="Ex: Mercado..." required>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary">Categoria</label>
+                                    <select name="categoria" class="form-select" required>
+                                        <option th:each="cat : ${categoriasPreset}" th:value="${cat}" th:text="${cat}"></option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label small text-secondary">Tipo</label>
+                                    <select name="tipo" class="form-select" required>
+                                        <option value="ENTRADA">Entrada</option>
+                                        <option value="SAIDA">Saída</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mt-4">
+                                    <button class="btn btn-primary w-100 py-2">Confirmar Lançamento</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    </body>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

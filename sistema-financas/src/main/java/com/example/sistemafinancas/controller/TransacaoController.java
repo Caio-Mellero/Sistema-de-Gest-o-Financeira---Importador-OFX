@@ -5,6 +5,7 @@ import com.example.sistemafinancas.model.Transacao;
 import com.example.sistemafinancas.repository.TransacaoRepository;
 import com.example.sistemafinancas.service.TransacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,11 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
 import java.text.NumberFormat;
-import java.util.Locale;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class TransacaoController {
@@ -30,94 +30,118 @@ public class TransacaoController {
     @Autowired
     private TransacaoService transacaoService;
 
+    // === ROTA 1: PÁGINA INICIAL (TABELA) - ESTAVA FALTANDO ESTE BLOCO ===
     @GetMapping("/")
-    public String listarTransacoes(Model model) {
+    public String listarTransacoes(@RequestParam(required = false, defaultValue = "data") String ordem, Model model) {
 
-        List<Transacao> todas = repository.findAll();
+        // 1. Ordenação
+        Sort sort;
+        if ("valor".equals(ordem)) {
+            sort = Sort.by(Sort.Direction.DESC, "valor");
+        } else if ("texto".equals(ordem)) {
+            sort = Sort.by(Sort.Direction.ASC, "descricao");
+        } else {
+            sort = Sort.by(Sort.Direction.DESC, "data");
+        }
+
+        // 2. Busca os dados
+        List<Transacao> todas = repository.findAll(sort);
         model.addAttribute("transacoes", todas);
+        model.addAttribute("filtroAtual", ordem);
 
-        // Categorias
-        List<String> categoriasPreset = Arrays.asList(
-                "Alimentação", "Lazer", "Transporte", "Fatura", "Saúde", "Educação", "Moradia", "Outros"
-        );
-        model.addAttribute("categoriasPreset", categoriasPreset);
+        // 3. Calcula Totais para os Cards
+        calcularTotais(todas, model);
 
-        // Cálculo de totais
-        BigDecimal entradas = todas.stream()
+        // 4. Lista de Categorias para o Modal
+        model.addAttribute("categoriasPreset", Arrays.asList(
+                "Alimentação", "Lazer", "Transporte", "Fatura", "Saúde", "Educação", "Moradia", "Outros"));
+
+        return "index"; // Carrega o index.html com a tabela
+    }
+
+    // === ROTA 2: DASHBOARD (GRÁFICOS) ===
+    @GetMapping("/dashboard")
+    public String carregarGraficos(Model model) {
+        List<Transacao> todas = repository.findAll();
+
+        // Reutiliza o cálculo de totais
+        calcularTotais(todas, model);
+
+        // Prepara dados para o Gráfico de Rosca
+        Map<String, BigDecimal> gastosPorCategoria = todas.stream()
+                .filter(t -> t.getTipo() == TipoTransacao.SAIDA)
+                .collect(Collectors.groupingBy(
+                        Transacao::getCategoria,
+                        Collectors.reducing(BigDecimal.ZERO, Transacao::getValor, BigDecimal::add)
+                ));
+
+        List<String> nomes = new ArrayList<>();
+        List<BigDecimal> valores = new ArrayList<>();
+
+        for (Map.Entry<String, BigDecimal> entry : gastosPorCategoria.entrySet()) {
+            nomes.add(entry.getKey());
+            valores.add(entry.getValue().abs());
+        }
+
+        model.addAttribute("graficoNomes", nomes);
+        model.addAttribute("graficoValores", valores);
+
+        return "dashboard";
+    }
+
+    // === MÉTODO AUXILIAR (PARA NÃO REPETIR CÓDIGO) ===
+    private void calcularTotais(List<Transacao> transacoes, Model model) {
+        BigDecimal entradas = transacoes.stream()
                 .filter(t -> t.getTipo() == TipoTransacao.ENTRADA)
                 .map(Transacao::getValor)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal saidas = todas.stream()
+        BigDecimal saidas = transacoes.stream()
                 .filter(t -> t.getTipo() == TipoTransacao.SAIDA)
                 .map(Transacao::getValor)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal saldo = entradas.add(saidas);
+
         NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
         model.addAttribute("totalEntradasFmt", nf.format(entradas.abs()));
         model.addAttribute("totalSaidasFmt", nf.format(saidas.abs()));
-        model.addAttribute("saldoFmt", nf.format(entradas.subtract(saidas.abs())));
-
-        return "index"; // ou "dashboard", dependendo do nome do seu template
+        model.addAttribute("saldoFmt", nf.format(saldo));
     }
 
+    // === MÉTODOS DE AÇÃO (POST) ===
     @PostMapping("/importar")
-    public String importar(@RequestParam("arquivo") MultipartFile arquivo, RedirectAttributes attributes) {
-        if (arquivo.isEmpty()) {
-            attributes.addFlashAttribute("mensagem", "Por favor, selecione um arquivo OFX.");
-            return "redirect:/";
-        }
-
+    public String importar(@RequestParam("arquivo") MultipartFile arquivo, RedirectAttributes attr) {
         try {
             int total = transacaoService.importarOFX(arquivo.getInputStream());
-
-            if (total > 0) {
-                attributes.addFlashAttribute("mensagem", total + " novas transações processadas com sucesso!");
-            } else {
-                attributes.addFlashAttribute("mensagem", "Nenhuma transação nova encontrada. O arquivo parece já ter sido importado.");
-            }
-
+            attr.addFlashAttribute("mensagem", total > 0 ? total + " importados!" : "Nada novo.");
         } catch (Exception e) {
-            attributes.addFlashAttribute("mensagem", "Erro ao importar: " + e.getMessage());
+            attr.addFlashAttribute("mensagem", "Erro: " + e.getMessage());
         }
-
-        return "redirect:/"; // Atualiza a página para mostrar os novos dados
-    }
-
-    @PostMapping("/atualizar-categoria")
-    public String atualizarCategoria(@RequestParam("id") Long id, @RequestParam("novaCategoria") String novaCategoria) {
-        Transacao t = repository.findById(id).orElseThrow();
-        t.setCategoria(novaCategoria);
-        repository.save(t); // Atualiza no banco
         return "redirect:/";
     }
 
     @PostMapping("/lancar-manualmente")
-    public String lancarManual(
-            @RequestParam("data") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
-            @RequestParam("categoria") String categoria,
-            @RequestParam("descricao") String descricao,
-            @RequestParam("tipo") TipoTransacao tipo,
-            @RequestParam("valor") BigDecimal valor,
-            RedirectAttributes redirectAttributes
-    ) {
-        Transacao nova = new Transacao();
-        nova.setData(data);
-        nova.setCategoria(categoria);
-        nova.setDescricao(descricao);
-        nova.setTipo(tipo);
-        nova.setValor(valor);
+    public String lancarManual(Transacao transacao, RedirectAttributes attr) {
+        if (transacao.getTipo() == TipoTransacao.SAIDA && transacao.getValor().compareTo(BigDecimal.ZERO) > 0) {
+            transacao.setValor(transacao.getValor().negate());
+        }
+        repository.save(transacao);
+        attr.addFlashAttribute("mensagem", "Salvo com sucesso!");
+        return "redirect:/";
+    }
 
-        repository.save(nova);
-
-        redirectAttributes.addFlashAttribute("mensagem", "Transação lançada com sucesso!");
+    @PostMapping("/atualizar-categoria")
+    public String atualizarCategoria(@RequestParam("id") Long id, @RequestParam("novaCategoria") String cat) {
+        Transacao t = repository.findById(id).orElseThrow();
+        t.setCategoria(cat);
+        repository.save(t);
         return "redirect:/";
     }
 
     @PostMapping("/apagar/{id}")
-    public String apagarTransacao(@PathVariable Long id) {
+    public String apagar(@PathVariable Long id) {
         repository.deleteById(id);
         return "redirect:/";
     }
-
 }
