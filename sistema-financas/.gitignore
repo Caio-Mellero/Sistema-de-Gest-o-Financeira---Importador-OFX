@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Banco de dados local
+*.db
+*.mv.db
+sistema-financas/dados/

@@ -6,7 +6,6 @@ import com.example.sistemafinancas.repository.TransacaoRepository;
 import com.example.sistemafinancas.service.TransacaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +17,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,11 +28,10 @@ public class TransacaoController {
     @Autowired
     private TransacaoService transacaoService;
 
-    // === ROTA 1: PÁGINA INICIAL (TABELA) - ESTAVA FALTANDO ESTE BLOCO ===
     @GetMapping("/")
     public String listarTransacoes(@RequestParam(required = false, defaultValue = "data") String ordem, Model model) {
 
-        // 1. Ordenação
+        // Ordenação
         Sort sort;
         if ("valor".equals(ordem)) {
             sort = Sort.by(Sort.Direction.DESC, "valor");
@@ -44,27 +41,25 @@ public class TransacaoController {
             sort = Sort.by(Sort.Direction.DESC, "data");
         }
 
-        // 2. Busca os dados
+        // Busca os dados
         List<Transacao> todas = repository.findAll(sort);
         model.addAttribute("transacoes", todas);
         model.addAttribute("filtroAtual", ordem);
 
-        // 3. Calcula Totais para os Cards
+        // Calculo total dos Cards
         calcularTotais(todas, model);
 
-        // 4. Lista de Categorias para o Modal
+        //Lista de Categorias para o Modal
         model.addAttribute("categoriasPreset", Arrays.asList(
                 "Alimentação", "Lazer", "Transporte", "Fatura", "Saúde", "Educação", "Moradia", "Outros"));
 
         return "index"; // Carrega o index.html com a tabela
     }
 
-    // === ROTA 2: DASHBOARD (GRÁFICOS) ===
     @GetMapping("/dashboard")
     public String carregarGraficos(Model model) {
         List<Transacao> todas = repository.findAll();
 
-        // Reutiliza o cálculo de totais
         calcularTotais(todas, model);
 
         // Prepara dados para o Gráfico de Rosca
@@ -86,10 +81,18 @@ public class TransacaoController {
         model.addAttribute("graficoNomes", nomes);
         model.addAttribute("graficoValores", valores);
 
+        // Preparando dados dos últimos 3 meses (Exemplo)
+        List<String> meses = Arrays.asList("Outubro", "Novembro", "Dezembro");
+        List<BigDecimal> somaEntradas = Arrays.asList(new BigDecimal("5000"), new BigDecimal("4800"), new BigDecimal("5200"));
+        List<BigDecimal> somaSaidas = Arrays.asList(new BigDecimal("3000"), new BigDecimal("3500"), new BigDecimal("2900"));
+
+        model.addAttribute("labelsMeses", meses);
+        model.addAttribute("dadosEntradas", somaEntradas);
+        model.addAttribute("dadosSaidas", somaSaidas);
+
         return "dashboard";
     }
 
-    // === MÉTODO AUXILIAR (PARA NÃO REPETIR CÓDIGO) ===
     private void calcularTotais(List<Transacao> transacoes, Model model) {
         BigDecimal entradas = transacoes.stream()
                 .filter(t -> t.getTipo() == TipoTransacao.ENTRADA)
@@ -103,13 +106,12 @@ public class TransacaoController {
 
         BigDecimal saldo = entradas.add(saidas);
 
-        NumberFormat nf = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+        NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"));
         model.addAttribute("totalEntradasFmt", nf.format(entradas.abs()));
         model.addAttribute("totalSaidasFmt", nf.format(saidas.abs()));
         model.addAttribute("saldoFmt", nf.format(saldo));
     }
 
-    // === MÉTODOS DE AÇÃO (POST) ===
     @PostMapping("/importar")
     public String importar(@RequestParam("arquivo") MultipartFile arquivo, RedirectAttributes attr) {
         try {

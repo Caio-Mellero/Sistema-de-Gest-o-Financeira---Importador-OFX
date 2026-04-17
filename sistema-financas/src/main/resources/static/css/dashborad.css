@@ -1,0 +1,36 @@
+/* Ajustes exclusivos da Navbar no Dashboard */
+.navbar {
+    background-color: var(--bg-card);
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.nav-link.active {
+    color: var(--text-primary) !important;
+    font-weight: 700;
+}
+
+.nav-link:hover {
+    color: var(--text-primary);
+}
+
+/* Títulos e Cards do Dashboard */
+.card-dark .card-title {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.card-dark h3 {
+    margin-top: 0.5rem;
+    font-weight: 700;
+}
+
+/* Container do Gráfico para garantir que ele não "estoure" o card */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}

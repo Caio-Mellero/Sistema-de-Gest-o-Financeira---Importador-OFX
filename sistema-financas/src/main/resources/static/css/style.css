@@ -1,0 +1,73 @@
+/* src/main/resources/static/css/base.css */
+
+:root {
+    --bg-body: #09090b;
+    --bg-card: #18181b;
+    --bg-card-hover: #27272a;
+    --border-color: #27272a;
+    --text-primary: #f4f4f5;
+    --text-secondary: #a1a1aa;
+    --accent-color: #3b82f6;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Header & Titles */
+.app-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+    background: rgba(9, 9, 11, 0.8);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+h2 { font-weight: 600; letter-spacing: -0.5px; }
+
+/* Cards Genéricos */
+.card-dark {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.card-dark:hover {
+    border-color: #3f3f46;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Botões Globais */
+.btn-primary {
+    background-color: var(--accent-color);
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+    border-radius: 8px;
+}
+.btn-primary:hover { background-color: #2563eb; }
+
+/* Modais e Formulários */
+.modal-content {
+    background-color: #18181b;
+    border: 1px solid #27272a;
+    border-radius: 16px;
+}
+.form-control, .form-select {
+    background-color: #09090b;
+    border: 1px solid #27272a;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+}
