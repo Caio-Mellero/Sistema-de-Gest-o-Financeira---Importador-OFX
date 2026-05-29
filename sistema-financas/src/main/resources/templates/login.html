@@ -135,11 +135,17 @@
     </div>
     <p class="auth-subtitle">Entre na sua conta para continuar</p>
 
-    <!-- Mensagens de feedback -->
-    <div th:if="${erro}" class="alert-auth">
+    <!-- Mensagens de feedback do Spring Security (parâmetros da URL) -->
+    <div th:if="${param.erro}" class="alert-auth">
         <i class="bi bi-exclamation-circle me-2"></i>
-        <span th:text="${erro}"></span>
+        <span>E-mail ou senha incorretos.</span>
     </div>
+    <div th:if="${param.logout}" class="alert-success-auth">
+        <i class="bi bi-check-circle me-2"></i>
+        <span>Você saiu com sucesso.</span>
+    </div>
+
+    <!-- Mensagens de feedback de registro (flash attributes) -->
     <div th:if="${sucesso}" class="alert-success-auth">
         <i class="bi bi-check-circle me-2"></i>
         <span th:text="${sucesso}"></span>

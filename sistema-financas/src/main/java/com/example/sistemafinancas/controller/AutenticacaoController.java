@@ -2,15 +2,12 @@ package com.example.sistemafinancas.controller;
 
 import com.example.sistemafinancas.model.Usuario;
 import com.example.sistemafinancas.service.UsuarioService;
-import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.Optional;
 
 @Controller
 public class AutenticacaoController {
@@ -22,42 +19,35 @@ public class AutenticacaoController {
     }
 
     // =========================================================================
-    // LOGIN
+    // LANDING PAGE E AUTH
     // =========================================================================
 
+    @GetMapping("/")
+    public String landingPage(@AuthenticationPrincipal Usuario usuario) {
+        if (usuario != null) {
+            return "redirect:/app";
+        }
+        return "landing";
+    }
+
     @GetMapping("/login")
-    public String paginaLogin(HttpSession session) {
+    public String paginaLogin(@AuthenticationPrincipal Usuario usuario) {
         // Se já estiver logado, redireciona direto para home
-        if (session.getAttribute("usuarioLogado") != null) {
-            return "redirect:/";
+        if (usuario != null) {
+            return "redirect:/app";
         }
         return "login";
     }
 
-    @PostMapping("/login")
-    public String processarLogin(@RequestParam String email,
-                                 @RequestParam String senha,
-                                 HttpSession session,
-                                 RedirectAttributes attr) {
-        Optional<Usuario> usuario = usuarioService.autenticar(email, senha);
-
-        if (usuario.isPresent()) {
-            session.setAttribute("usuarioLogado", usuario.get());
-            session.setMaxInactiveInterval(60 * 60 * 8); // Sessão de 8 horas
-            return "redirect:/";
-        } else {
-            attr.addFlashAttribute("erro", "E-mail ou senha incorretos.");
-            return "redirect:/login";
-        }
-    }
+    // O POST /login e POST /logout são interceptados e processados automaticamente pelo Spring Security
 
     // =========================================================================
     // CADASTRO
     // =========================================================================
 
     @GetMapping("/registrar")
-    public String paginaRegistro(HttpSession session) {
-        if (session.getAttribute("usuarioLogado") != null) {
+    public String paginaRegistro(@AuthenticationPrincipal Usuario usuario) {
+        if (usuario != null) {
             return "redirect:/";
         }
         return "registrar";
@@ -65,11 +55,10 @@ public class AutenticacaoController {
 
     @PostMapping("/registrar")
     public String processarRegistro(@RequestParam String nome,
-                                    @RequestParam String email,
-                                    @RequestParam String senha,
-                                    @RequestParam String confirmarSenha,
-                                    HttpSession session,
-                                    RedirectAttributes attr) {
+            @RequestParam String email,
+            @RequestParam String senha,
+            @RequestParam String confirmarSenha,
+            RedirectAttributes attr) {
 
         if (!senha.equals(confirmarSenha)) {
             attr.addFlashAttribute("erro", "As senhas não coincidem.");
@@ -90,15 +79,5 @@ public class AutenticacaoController {
             attr.addFlashAttribute("erro", "Este e-mail já está cadastrado.");
             return "redirect:/registrar";
         }
-    }
-
-    // =========================================================================
-    // LOGOUT
-    // =========================================================================
-
-    @PostMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate(); // Destrói a sessão completamente
-        return "redirect:/login";
     }
 }

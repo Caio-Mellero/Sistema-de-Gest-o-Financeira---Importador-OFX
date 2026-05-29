@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Finanças — Controle Financeiro Simplificado</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background-color: #09090b;
+            color: #e4e4e7;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: rgba(9, 9, 11, 0.8) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #fff !important;
+        }
+
+        .btn-outline-custom {
+            color: #e4e4e7;
+            border: 1px solid #3f3f46;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-custom:hover {
+            background-color: #27272a;
+            color: #fff;
+            border-color: #52525b;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .btn-primary-custom:hover {
+            opacity: 0.9;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            padding: 8rem 0 6rem 0;
+            position: relative;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #ffffff, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #a1a1aa;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+            max-width: 600px;
+        }
+
+        .glow-effect {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(9, 9, 11, 0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Features Section */
+        .feature-card {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 16px;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: #3f3f46;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-desc {
+            color: #71717a;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 3rem 0;
+            margin-top: 5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-section {
+                padding: 5rem 0 3rem 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-wallet-fill text-primary me-2" style="color: #818cf8 !important;"></i>Minhas Finanças
+            </a>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+                <i class="bi bi-list text-white fs-2"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center gap-3 mt-3 mt-lg-0">
+                    <li class="nav-item w-100 w-lg-auto">
+                        <a class="nav-link btn btn-outline-custom w-100 text-center px-4" href="/login">Entrar</a>
+                    </li>
+                    <li class="nav-item w-100 w-lg-auto">
+                        <a class="nav-link btn btn-primary-custom w-100 text-center" href="/registrar">Criar conta
+                            gratuita</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="glow-effect"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0">
+                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary mb-3 px-3 py-2"
+                        style="border: 1px solid rgba(99,102,241,0.2);">
+                        <i class="bi bi-stars me-1"></i> Nova versão 2.0 disponível
+                    </span>
+                    <h1 class="hero-title">O controle do seu dinheiro, simples e inteligente.</h1>
+                    <p class="hero-subtitle">Importe arquivos OFX do seu banco, classifique seus gastos automaticamente
+                        e tome decisões melhores com nossos gráficos em tempo real.</p>
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <a href="/registrar" class="btn btn-primary-custom btn-lg px-4 py-3">Começar agora — É
+                            grátis</a>
+                        <a href="#funcionalidades" class="btn btn-outline-custom btn-lg px-4 py-3">Conheça os
+                            recursos</a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="position-relative">
+                        <!-- Mockup visual abstrato simulando o dashboard -->
+                        <div class="p-2 rounded-4"
+                            style="background: linear-gradient(135deg, rgba(39,39,42,0.5), rgba(24,24,27,0.5)); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1000"
+                                alt="Dashboard Preview" class="img-fluid rounded-3 opacity-75"
+                                style="mix-blend-mode: luminosity;">
+                        </div>
+                        <!-- Float card -->
+                        <div class="position-absolute bottom-0 start-0 translate-middle-y ms-n4 d-none d-md-block"
+                            style="background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 1.25rem; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-success bg-opacity-10 p-2 rounded-circle text-success">
+                                    <i class="bi bi-arrow-up-right fs-4"></i>
+                                </div>
+                                <div>
+                                    <p class="text-secondary small m-0">Economia mensal</p>
+                                    <h5 class="text-white fw-bold m-0">+ R$ 1.250,00</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="funcionalidades" class="container py-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-white mb-3">Tudo o que você precisa</h2>
+            <p class="text-secondary">Ferramentas profissionais projetadas para simplificar a sua vida financeira.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                    </div>
+                    <h3 class="feature-title">Importação de OFX</h3>
+                    <p class="feature-desc">Esqueça o lançamento manual. Importe o extrato do seu banco direto para o
+                        sistema em segundos e deixe o trabalho pesado com a gente.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="color: #34d399; background: rgba(52, 211, 153, 0.1);">
+                        <i class="bi bi-pie-chart-fill"></i>
+                    </div>
+                    <h3 class="feature-title">Dashboards Visuais</h3>
+                    <p class="feature-desc">Entenda para onde vai o seu dinheiro com gráficos interativos de rosca e
+                        barras, baseados no seu histórico real dos últimos 6 meses.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon" style="color: #f472b6; background: rgba(244, 114, 182, 0.1);">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <h3 class="feature-title">Segurança Avançada</h3>
+                    <p class="feature-desc">Seus dados estão protegidos com criptografia BCrypt e isolamento total por
+                        conta. Você é o único dono das suas informações financeiras.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container text-center">
+            <a class="navbar-brand fs-4 mb-3 d-inline-block" href="/">
+                <i class="bi bi-wallet-fill text-primary me-2" style="color: #818cf8 !important;"></i>Minhas Finanças
+            </a>
+            <p class="text-secondary small m-0">© 2026 Minhas Finanças. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

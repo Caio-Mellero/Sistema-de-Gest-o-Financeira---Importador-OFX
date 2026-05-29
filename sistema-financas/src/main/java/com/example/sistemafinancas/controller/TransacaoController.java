@@ -5,8 +5,8 @@ import com.example.sistemafinancas.model.Transacao;
 import com.example.sistemafinancas.model.Usuario;
 import com.example.sistemafinancas.repository.TransacaoRepository;
 import com.example.sistemafinancas.service.TransacaoService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,20 +34,14 @@ public class TransacaoController {
         this.transacaoService = transacaoService;
     }
 
-    // Utilitário: extrai o usuário da sessão HTTP
-    private Usuario getUsuarioLogado(HttpSession session) {
-        return (Usuario) session.getAttribute("usuarioLogado");
-    }
-
     // =========================================================================
     // LISTAGEM PRINCIPAL
     // =========================================================================
 
-    @GetMapping("/")
+    @GetMapping("/app")
     public String listarTransacoes(@RequestParam(required = false, defaultValue = "data") String ordem,
-            HttpSession session,
+            @AuthenticationPrincipal Usuario usuario,
             Model model) {
-        Usuario usuario = getUsuarioLogado(session);
 
         Sort sort = switch (ordem) {
             case "valor" -> Sort.by(Sort.Direction.DESC, "valor");
@@ -74,8 +67,7 @@ public class TransacaoController {
     // =========================================================================
 
     @GetMapping("/dashboard")
-    public String carregarGraficos(HttpSession session, Model model) {
-        Usuario usuario = getUsuarioLogado(session);
+    public String carregarGraficos(@AuthenticationPrincipal Usuario usuario, Model model) {
         List<Transacao> todas = repository.findByUsuario(usuario);
 
         model.addAttribute("nomeUsuario", usuario.getNome());
@@ -143,10 +135,9 @@ public class TransacaoController {
 
     @PostMapping("/importar")
     public String importar(@RequestParam("arquivo") MultipartFile arquivo,
-            HttpSession session,
+            @AuthenticationPrincipal Usuario usuario,
             RedirectAttributes attr) {
         try {
-            Usuario usuario = getUsuarioLogado(session);
             int total = transacaoService.importarOFX(arquivo.getInputStream(), usuario);
             attr.addFlashAttribute("mensagem",
                     total > 0 ? total + " transaç" + (total == 1 ? "ão importada" : "ões importadas") + "!"
@@ -154,7 +145,7 @@ public class TransacaoController {
         } catch (Exception e) {
             attr.addFlashAttribute("mensagem", "Erro ao importar: " + e.getMessage());
         }
-        return "redirect:/";
+        return "redirect:/app";
     }
 
     // =========================================================================
@@ -163,9 +154,8 @@ public class TransacaoController {
 
     @PostMapping("/lancar-manualmente")
     public String lancarManual(Transacao transacao,
-            HttpSession session,
+            @AuthenticationPrincipal Usuario usuario,
             RedirectAttributes attr) {
-        Usuario usuario = getUsuarioLogado(session);
         transacao.setUsuario(usuario);
 
         if (transacao.getTipo() == TipoTransacao.SAIDA
@@ -174,7 +164,7 @@ public class TransacaoController {
         }
         repository.save(transacao);
         attr.addFlashAttribute("mensagem", "Lançamento salvo com sucesso!");
-        return "redirect:/";
+        return "redirect:/app";
     }
 
     // =========================================================================
@@ -184,17 +174,16 @@ public class TransacaoController {
     @PostMapping("/atualizar-categoria")
     public String atualizarCategoria(@RequestParam("id") Long id,
             @RequestParam("novaCategoria") String cat,
-            HttpSession session) {
-        Usuario usuario = getUsuarioLogado(session);
+            @AuthenticationPrincipal Usuario usuario) {
         Transacao t = repository.findById(id).orElseThrow();
 
         // Segurança: garante que o usuário só edita suas próprias transações
         if (!t.getUsuario().getId().equals(usuario.getId())) {
-            return "redirect:/";
+            return "redirect:/app";
         }
         t.setCategoria(cat);
         repository.save(t);
-        return "redirect:/";
+        return "redirect:/app";
     }
 
     // =========================================================================
@@ -202,15 +191,14 @@ public class TransacaoController {
     // =========================================================================
 
     @PostMapping("/apagar/{id}")
-    public String apagar(@PathVariable Long id, HttpSession session) {
-        Usuario usuario = getUsuarioLogado(session);
+    public String apagar(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
         Transacao t = repository.findById(id).orElseThrow();
 
         // Segurança: garante que o usuário só apaga suas próprias transações
         if (t.getUsuario().getId().equals(usuario.getId())) {
             repository.deleteById(id);
         }
-        return "redirect:/";
+        return "redirect:/app";
     }
 
     // =========================================================================
