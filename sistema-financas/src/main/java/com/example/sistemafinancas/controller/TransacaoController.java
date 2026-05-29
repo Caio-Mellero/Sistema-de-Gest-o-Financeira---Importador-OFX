@@ -46,14 +46,14 @@ public class TransacaoController {
 
     @GetMapping("/")
     public String listarTransacoes(@RequestParam(required = false, defaultValue = "data") String ordem,
-                                   HttpSession session,
-                                   Model model) {
+            HttpSession session,
+            Model model) {
         Usuario usuario = getUsuarioLogado(session);
 
         Sort sort = switch (ordem) {
             case "valor" -> Sort.by(Sort.Direction.DESC, "valor");
             case "texto" -> Sort.by(Sort.Direction.ASC, "descricao");
-            default      -> Sort.by(Sort.Direction.DESC, "data");
+            default -> Sort.by(Sort.Direction.DESC, "data");
         };
 
         List<Transacao> todas = repository.findByUsuario(usuario, sort);
@@ -86,8 +86,7 @@ public class TransacaoController {
                 .filter(t -> t.getTipo() == TipoTransacao.SAIDA)
                 .collect(Collectors.groupingBy(
                         t -> t.getCategoria() != null ? t.getCategoria() : "Não categorizado",
-                        Collectors.reducing(BigDecimal.ZERO, Transacao::getValor, BigDecimal::add)
-                ));
+                        Collectors.reducing(BigDecimal.ZERO, Transacao::getValor, BigDecimal::add)));
 
         List<String> graficoNomes = new ArrayList<>();
         List<BigDecimal> graficoValores = new ArrayList<>();
@@ -113,15 +112,15 @@ public class TransacaoController {
 
             BigDecimal entradas = todas.stream()
                     .filter(t -> t.getTipo() == TipoTransacao.ENTRADA
-                                 && t.getData().getYear() == ano
-                                 && t.getData().getMonthValue() == numMes)
+                            && t.getData().getYear() == ano
+                            && t.getData().getMonthValue() == numMes)
                     .map(Transacao::getValor)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
             BigDecimal saidas = todas.stream()
                     .filter(t -> t.getTipo() == TipoTransacao.SAIDA
-                                 && t.getData().getYear() == ano
-                                 && t.getData().getMonthValue() == numMes)
+                            && t.getData().getYear() == ano
+                            && t.getData().getMonthValue() == numMes)
                     .map(Transacao::getValor)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -144,13 +143,14 @@ public class TransacaoController {
 
     @PostMapping("/importar")
     public String importar(@RequestParam("arquivo") MultipartFile arquivo,
-                           HttpSession session,
-                           RedirectAttributes attr) {
+            HttpSession session,
+            RedirectAttributes attr) {
         try {
             Usuario usuario = getUsuarioLogado(session);
             int total = transacaoService.importarOFX(arquivo.getInputStream(), usuario);
             attr.addFlashAttribute("mensagem",
-                    total > 0 ? total + " transaç" + (total == 1 ? "ão importada" : "ões importadas") + "!" : "Nada novo para importar.");
+                    total > 0 ? total + " transaç" + (total == 1 ? "ão importada" : "ões importadas") + "!"
+                            : "Nada novo para importar.");
         } catch (Exception e) {
             attr.addFlashAttribute("mensagem", "Erro ao importar: " + e.getMessage());
         }
@@ -163,8 +163,8 @@ public class TransacaoController {
 
     @PostMapping("/lancar-manualmente")
     public String lancarManual(Transacao transacao,
-                               HttpSession session,
-                               RedirectAttributes attr) {
+            HttpSession session,
+            RedirectAttributes attr) {
         Usuario usuario = getUsuarioLogado(session);
         transacao.setUsuario(usuario);
 
@@ -183,8 +183,8 @@ public class TransacaoController {
 
     @PostMapping("/atualizar-categoria")
     public String atualizarCategoria(@RequestParam("id") Long id,
-                                     @RequestParam("novaCategoria") String cat,
-                                     HttpSession session) {
+            @RequestParam("novaCategoria") String cat,
+            HttpSession session) {
         Usuario usuario = getUsuarioLogado(session);
         Transacao t = repository.findById(id).orElseThrow();
 
@@ -236,4 +236,3 @@ public class TransacaoController {
         model.addAttribute("saldoFmt", nf.format(saldo));
     }
 }
-

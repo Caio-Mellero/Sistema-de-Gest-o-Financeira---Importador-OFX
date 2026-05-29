@@ -4,8 +4,8 @@ echo Iniciando o servidor Java...
 echo POR FAVOR, AGUARDE O CARREGAMENTO COMPLETO.
 echo.
 
-:: Inicia o Java em uma nova janela para permitir que o script continue para o delay
-start "LOGS-SPRING" java -jar target/sistema-financas-0.0.1-SNAPSHOT.jar
+:: Inicia o Spring Boot usando o Maven (compila e roda o codigo mais recente)
+start "LOGS-SPRING" cmd /c ".\mvnw.cmd spring-boot:run"
 
 :: Delay de 8 segundos (tempo médio para o Spring Boot subir com H2)
 echo Aguardando 8 segundos para o sistema subir...
