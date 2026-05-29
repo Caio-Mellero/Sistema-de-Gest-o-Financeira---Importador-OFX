@@ -2,9 +2,10 @@ package com.example.sistemafinancas.controller;
 
 import com.example.sistemafinancas.model.TipoTransacao;
 import com.example.sistemafinancas.model.Transacao;
+import com.example.sistemafinancas.model.Usuario;
 import com.example.sistemafinancas.repository.TransacaoRepository;
 import com.example.sistemafinancas.service.TransacaoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,81 +18,204 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
 public class TransacaoController {
 
-    @Autowired
-    private TransacaoRepository repository;
-    @Autowired
-    private TransacaoService transacaoService;
+    private final TransacaoRepository repository;
+    private final TransacaoService transacaoService;
+
+    public TransacaoController(TransacaoRepository repository, TransacaoService transacaoService) {
+        this.repository = repository;
+        this.transacaoService = transacaoService;
+    }
+
+    // Utilitário: extrai o usuário da sessão HTTP
+    private Usuario getUsuarioLogado(HttpSession session) {
+        return (Usuario) session.getAttribute("usuarioLogado");
+    }
+
+    // =========================================================================
+    // LISTAGEM PRINCIPAL
+    // =========================================================================
 
     @GetMapping("/")
-    public String listarTransacoes(@RequestParam(required = false, defaultValue = "data") String ordem, Model model) {
+    public String listarTransacoes(@RequestParam(required = false, defaultValue = "data") String ordem,
+                                   HttpSession session,
+                                   Model model) {
+        Usuario usuario = getUsuarioLogado(session);
 
-        // Ordenação
-        Sort sort;
-        if ("valor".equals(ordem)) {
-            sort = Sort.by(Sort.Direction.DESC, "valor");
-        } else if ("texto".equals(ordem)) {
-            sort = Sort.by(Sort.Direction.ASC, "descricao");
-        } else {
-            sort = Sort.by(Sort.Direction.DESC, "data");
-        }
+        Sort sort = switch (ordem) {
+            case "valor" -> Sort.by(Sort.Direction.DESC, "valor");
+            case "texto" -> Sort.by(Sort.Direction.ASC, "descricao");
+            default      -> Sort.by(Sort.Direction.DESC, "data");
+        };
 
-        // Busca os dados
-        List<Transacao> todas = repository.findAll(sort);
+        List<Transacao> todas = repository.findByUsuario(usuario, sort);
         model.addAttribute("transacoes", todas);
         model.addAttribute("filtroAtual", ordem);
+        model.addAttribute("nomeUsuario", usuario.getNome());
 
-        // Calculo total dos Cards
         calcularTotais(todas, model);
 
-        //Lista de Categorias para o Modal
         model.addAttribute("categoriasPreset", Arrays.asList(
                 "Alimentação", "Lazer", "Transporte", "Fatura", "Saúde", "Educação", "Moradia", "Outros"));
 
-        return "index"; // Carrega o index.html com a tabela
+        return "index";
     }
 
-    @GetMapping("/dashboard")
-    public String carregarGraficos(Model model) {
-        List<Transacao> todas = repository.findAll();
+    // =========================================================================
+    // DASHBOARD
+    // =========================================================================
 
+    @GetMapping("/dashboard")
+    public String carregarGraficos(HttpSession session, Model model) {
+        Usuario usuario = getUsuarioLogado(session);
+        List<Transacao> todas = repository.findByUsuario(usuario);
+
+        model.addAttribute("nomeUsuario", usuario.getNome());
         calcularTotais(todas, model);
 
-        // Prepara dados para o Gráfico de Rosca
+        // --- Gráfico de Rosca: gastos por categoria ---
         Map<String, BigDecimal> gastosPorCategoria = todas.stream()
                 .filter(t -> t.getTipo() == TipoTransacao.SAIDA)
                 .collect(Collectors.groupingBy(
-                        Transacao::getCategoria,
+                        t -> t.getCategoria() != null ? t.getCategoria() : "Não categorizado",
                         Collectors.reducing(BigDecimal.ZERO, Transacao::getValor, BigDecimal::add)
                 ));
 
-        List<String> nomes = new ArrayList<>();
-        List<BigDecimal> valores = new ArrayList<>();
+        List<String> graficoNomes = new ArrayList<>();
+        List<BigDecimal> graficoValores = new ArrayList<>();
+        gastosPorCategoria.forEach((cat, val) -> {
+            graficoNomes.add(cat);
+            graficoValores.add(val.abs());
+        });
 
-        for (Map.Entry<String, BigDecimal> entry : gastosPorCategoria.entrySet()) {
-            nomes.add(entry.getKey());
-            valores.add(entry.getValue().abs());
+        model.addAttribute("graficoNomes", graficoNomes);
+        model.addAttribute("graficoValores", graficoValores);
+
+        // --- Gráfico de Barras: histórico mensal real dos últimos 6 meses ---
+        List<String> labelsMeses = new ArrayList<>();
+        List<BigDecimal> dadosEntradas = new ArrayList<>();
+        List<BigDecimal> dadosSaidas = new ArrayList<>();
+        Locale ptBr = Locale.forLanguageTag("pt-BR");
+
+        LocalDate hoje = LocalDate.now();
+        for (int i = 5; i >= 0; i--) {
+            LocalDate mes = hoje.minusMonths(i);
+            int ano = mes.getYear();
+            int numMes = mes.getMonthValue();
+
+            BigDecimal entradas = todas.stream()
+                    .filter(t -> t.getTipo() == TipoTransacao.ENTRADA
+                                 && t.getData().getYear() == ano
+                                 && t.getData().getMonthValue() == numMes)
+                    .map(Transacao::getValor)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            BigDecimal saidas = todas.stream()
+                    .filter(t -> t.getTipo() == TipoTransacao.SAIDA
+                                 && t.getData().getYear() == ano
+                                 && t.getData().getMonthValue() == numMes)
+                    .map(Transacao::getValor)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            String nomeMes = mes.getMonth().getDisplayName(TextStyle.SHORT, ptBr);
+            labelsMeses.add(nomeMes + "/" + String.valueOf(ano).substring(2));
+            dadosEntradas.add(entradas);
+            dadosSaidas.add(saidas.abs());
         }
 
-        model.addAttribute("graficoNomes", nomes);
-        model.addAttribute("graficoValores", valores);
-
-        // Preparando dados dos últimos 3 meses (Exemplo)
-        List<String> meses = Arrays.asList("Outubro", "Novembro", "Dezembro");
-        List<BigDecimal> somaEntradas = Arrays.asList(new BigDecimal("5000"), new BigDecimal("4800"), new BigDecimal("5200"));
-        List<BigDecimal> somaSaidas = Arrays.asList(new BigDecimal("3000"), new BigDecimal("3500"), new BigDecimal("2900"));
-
-        model.addAttribute("labelsMeses", meses);
-        model.addAttribute("dadosEntradas", somaEntradas);
-        model.addAttribute("dadosSaidas", somaSaidas);
+        model.addAttribute("labelsMeses", labelsMeses);
+        model.addAttribute("dadosEntradas", dadosEntradas);
+        model.addAttribute("dadosSaidas", dadosSaidas);
 
         return "dashboard";
     }
+
+    // =========================================================================
+    // IMPORTAR OFX
+    // =========================================================================
+
+    @PostMapping("/importar")
+    public String importar(@RequestParam("arquivo") MultipartFile arquivo,
+                           HttpSession session,
+                           RedirectAttributes attr) {
+        try {
+            Usuario usuario = getUsuarioLogado(session);
+            int total = transacaoService.importarOFX(arquivo.getInputStream(), usuario);
+            attr.addFlashAttribute("mensagem",
+                    total > 0 ? total + " transaç" + (total == 1 ? "ão importada" : "ões importadas") + "!" : "Nada novo para importar.");
+        } catch (Exception e) {
+            attr.addFlashAttribute("mensagem", "Erro ao importar: " + e.getMessage());
+        }
+        return "redirect:/";
+    }
+
+    // =========================================================================
+    // LANÇAMENTO MANUAL
+    // =========================================================================
+
+    @PostMapping("/lancar-manualmente")
+    public String lancarManual(Transacao transacao,
+                               HttpSession session,
+                               RedirectAttributes attr) {
+        Usuario usuario = getUsuarioLogado(session);
+        transacao.setUsuario(usuario);
+
+        if (transacao.getTipo() == TipoTransacao.SAIDA
+                && transacao.getValor().compareTo(BigDecimal.ZERO) > 0) {
+            transacao.setValor(transacao.getValor().negate());
+        }
+        repository.save(transacao);
+        attr.addFlashAttribute("mensagem", "Lançamento salvo com sucesso!");
+        return "redirect:/";
+    }
+
+    // =========================================================================
+    // ATUALIZAR CATEGORIA
+    // =========================================================================
+
+    @PostMapping("/atualizar-categoria")
+    public String atualizarCategoria(@RequestParam("id") Long id,
+                                     @RequestParam("novaCategoria") String cat,
+                                     HttpSession session) {
+        Usuario usuario = getUsuarioLogado(session);
+        Transacao t = repository.findById(id).orElseThrow();
+
+        // Segurança: garante que o usuário só edita suas próprias transações
+        if (!t.getUsuario().getId().equals(usuario.getId())) {
+            return "redirect:/";
+        }
+        t.setCategoria(cat);
+        repository.save(t);
+        return "redirect:/";
+    }
+
+    // =========================================================================
+    // APAGAR TRANSAÇÃO
+    // =========================================================================
+
+    @PostMapping("/apagar/{id}")
+    public String apagar(@PathVariable Long id, HttpSession session) {
+        Usuario usuario = getUsuarioLogado(session);
+        Transacao t = repository.findById(id).orElseThrow();
+
+        // Segurança: garante que o usuário só apaga suas próprias transações
+        if (t.getUsuario().getId().equals(usuario.getId())) {
+            repository.deleteById(id);
+        }
+        return "redirect:/";
+    }
+
+    // =========================================================================
+    // UTILITÁRIOS PRIVADOS
+    // =========================================================================
 
     private void calcularTotais(List<Transacao> transacoes, Model model) {
         BigDecimal entradas = transacoes.stream()
@@ -111,39 +235,5 @@ public class TransacaoController {
         model.addAttribute("totalSaidasFmt", nf.format(saidas.abs()));
         model.addAttribute("saldoFmt", nf.format(saldo));
     }
-
-    @PostMapping("/importar")
-    public String importar(@RequestParam("arquivo") MultipartFile arquivo, RedirectAttributes attr) {
-        try {
-            int total = transacaoService.importarOFX(arquivo.getInputStream());
-            attr.addFlashAttribute("mensagem", total > 0 ? total + " importados!" : "Nada novo.");
-        } catch (Exception e) {
-            attr.addFlashAttribute("mensagem", "Erro: " + e.getMessage());
-        }
-        return "redirect:/";
-    }
-
-    @PostMapping("/lancar-manualmente")
-    public String lancarManual(Transacao transacao, RedirectAttributes attr) {
-        if (transacao.getTipo() == TipoTransacao.SAIDA && transacao.getValor().compareTo(BigDecimal.ZERO) > 0) {
-            transacao.setValor(transacao.getValor().negate());
-        }
-        repository.save(transacao);
-        attr.addFlashAttribute("mensagem", "Salvo com sucesso!");
-        return "redirect:/";
-    }
-
-    @PostMapping("/atualizar-categoria")
-    public String atualizarCategoria(@RequestParam("id") Long id, @RequestParam("novaCategoria") String cat) {
-        Transacao t = repository.findById(id).orElseThrow();
-        t.setCategoria(cat);
-        repository.save(t);
-        return "redirect:/";
-    }
-
-    @PostMapping("/apagar/{id}")
-    public String apagar(@PathVariable Long id) {
-        repository.deleteById(id);
-        return "redirect:/";
-    }
 }
+

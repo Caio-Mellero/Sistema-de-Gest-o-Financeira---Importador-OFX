@@ -1,17 +1,19 @@
 package com.example.sistemafinancas.model;
-import jakarta.persistence.*; // Biblioteca que cuida do banco de dados
-import lombok.Data;           // Faz o trabalho sujo de criar Getters/Setters
+import jakarta.persistence.*;
+import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Entity // Diz ao JPA: "Crie uma tabela chamada 'transacao' no Postgres"
-@Data   // Diz ao Lombok: "Crie os métodos get e set automaticamente"
-
+@Entity
+@Data
 public class Transacao {
 
-    @Id // Define que este campo é a Chave Primária (PK)
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // O banco gera o ID (1, 2, 3...)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // ID único do banco (da tag <FITID> do arquivo OFX) para evitar duplicidade real
+    private String fitId;
 
     private String descricao;
 
@@ -22,6 +24,11 @@ public class Transacao {
 
     private String categoria;
 
-    @Enumerated(EnumType.STRING) // Salva no banco o texto "ENTRADA" ou "SAIDA"
+    @Enumerated(EnumType.STRING)
     private TipoTransacao tipo;
+
+    // Cada transação pertence a um único usuário
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 }

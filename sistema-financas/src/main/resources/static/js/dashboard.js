@@ -1,7 +1,13 @@
+// Configuração global do Chart.js para tema escuro
+Chart.defaults.color = '#71717a';
+Chart.defaults.borderColor = '#27272a';
+
+/**
+ * Gráfico de rosca (donut) por categoria de gastos.
+ */
 function renderizarGraficoDonut(nomes, valores) {
     const ctx = document.getElementById('graficoCategoria');
-
-    if (!ctx) return; // Evita erro se o elemento não existir na página
+    if (!ctx) return;
 
     new Chart(ctx, {
         type: 'doughnut',
@@ -26,52 +32,54 @@ function renderizarGraficoDonut(nomes, valores) {
                     labels: { color: '#a1a1aa', font: { family: 'Inter' } }
                 }
             },
-            cutout: '70%' // Deixa a rosca mais fina e moderna
+            cutout: '70%'
         }
     });
 }
 
-function inicializarDashboard(dadosDonut, dadosBarra, dadosGauge) {
-    // Configuração Global do Chart.js para Tema Escuro
-    Chart.defaults.color = '#71717a';
-    Chart.defaults.borderColor = '#27272a';
+/**
+ * Gráfico de barras agrupadas com o histórico mensal real (últimos 6 meses).
+ */
+function renderizarGraficoHistorico(labels, entradas, saidas) {
+    const ctx = document.getElementById('graficoHistorico');
+    if (!ctx) return;
 
-    // 1. Gráfico de Rosca (Categorias)
-    new Chart(document.getElementById('donutChart'), {
-        type: 'doughnut',
-        data: {
-            labels: dadosDonut.labels,
-            datasets: [{
-                data: dadosDonut.valores,
-                backgroundColor: ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
-                borderWidth: 0
-            }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
-    });
-
-    // 2. Gráfico de Barras (Histórico)
-    new Chart(document.getElementById('histChart'), {
+    new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: dadosBarra.labels,
+            labels: labels,
             datasets: [
-                { label: 'Receitas', data: dadosBarra.receitas, backgroundColor: '#10b981' },
-                { label: 'Despesas', data: dadosBarra.despesas, backgroundColor: '#ef4444' }
+                {
+                    label: 'Entradas',
+                    data: entradas,
+                    backgroundColor: 'rgba(16, 185, 129, 0.75)',
+                    borderColor: '#10b981',
+                    borderWidth: 1,
+                    borderRadius: 4
+                },
+                {
+                    label: 'Saídas',
+                    data: saidas,
+                    backgroundColor: 'rgba(239, 68, 68, 0.75)',
+                    borderColor: '#ef4444',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }
             ]
         },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-
-    // 3. Gráfico Gauge (Orçamento)
-    new Chart(document.getElementById('gaugeChart'), {
-        type: 'doughnut',
-        data: {
-            datasets: [{
-                data: [dadosGauge.gasto, Math.max(0, dadosGauge.limite - dadosGauge.gasto)],
-                backgroundColor: [dadosGauge.gasto > dadosGauge.limite ? '#ef4444' : '#3b82f6', '#27272a'],
-                circumference: 180, rotation: 270, borderWidth: 0
-            }]
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { color: '#a1a1aa', font: { family: 'Inter' } }
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#71717a' }, grid: { color: '#27272a' } },
+                y: { ticks: { color: '#71717a' }, grid: { color: '#27272a' } }
+            }
         }
     });
-}
+}
