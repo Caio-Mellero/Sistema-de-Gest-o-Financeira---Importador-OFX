@@ -82,8 +82,10 @@ public class Usuario implements UserDetails {
     // Evita loop infinito e quebra de proxy nas coleções
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Usuario usuario = (Usuario) o;
         return id != null && id.equals(usuario.id);
     }
