@@ -1,7 +1,7 @@
-package com.example.sistemafinancas.controller;
+package com.example.finsight.controller;
 
-import com.example.sistemafinancas.model.Usuario;
-import com.example.sistemafinancas.service.UsuarioService;
+import com.example.finsight.model.Usuario;
+import com.example.finsight.service.UsuarioService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

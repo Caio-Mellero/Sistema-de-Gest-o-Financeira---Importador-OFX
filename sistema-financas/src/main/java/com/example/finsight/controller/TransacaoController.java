@@ -1,10 +1,10 @@
-package com.example.sistemafinancas.controller;
+package com.example.finsight.controller;
 
-import com.example.sistemafinancas.model.TipoTransacao;
-import com.example.sistemafinancas.model.Transacao;
-import com.example.sistemafinancas.model.Usuario;
-import com.example.sistemafinancas.repository.TransacaoRepository;
-import com.example.sistemafinancas.service.TransacaoService;
+import com.example.finsight.model.TipoTransacao;
+import com.example.finsight.model.Transacao;
+import com.example.finsight.model.Usuario;
+import com.example.finsight.repository.TransacaoRepository;
+import com.example.finsight.service.TransacaoService;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;

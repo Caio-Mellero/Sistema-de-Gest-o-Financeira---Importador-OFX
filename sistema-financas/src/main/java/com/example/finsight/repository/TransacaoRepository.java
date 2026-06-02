@@ -1,7 +1,7 @@
-package com.example.sistemafinancas.repository;
+package com.example.finsight.repository;
 
-import com.example.sistemafinancas.model.Transacao;
-import com.example.sistemafinancas.model.Usuario;
+import com.example.finsight.model.Transacao;
+import com.example.finsight.model.Usuario;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,7 +28,7 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
                      "WHERE t.usuario = :usuario AND t.tipo = :tipo " +
                      "AND FUNCTION('YEAR', t.data) = :ano AND FUNCTION('MONTH', t.data) = :mes")
        BigDecimal somarPorUsuarioTipoEMes(@Param("usuario") Usuario usuario,
-                     @Param("tipo") com.example.sistemafinancas.model.TipoTransacao tipo,
+                     @Param("tipo") com.example.finsight.model.TipoTransacao tipo,
                      @Param("ano") int ano,
                      @Param("mes") int mes);
 }

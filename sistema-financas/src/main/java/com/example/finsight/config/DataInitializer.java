@@ -1,8 +1,8 @@
-package com.example.sistemafinancas.config;
+package com.example.finsight.config;
 
-import com.example.sistemafinancas.model.Perfil;
-import com.example.sistemafinancas.model.Usuario;
-import com.example.sistemafinancas.repository.UsuarioRepository;
+import com.example.finsight.model.Perfil;
+import com.example.finsight.model.Usuario;
+import com.example.finsight.repository.UsuarioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

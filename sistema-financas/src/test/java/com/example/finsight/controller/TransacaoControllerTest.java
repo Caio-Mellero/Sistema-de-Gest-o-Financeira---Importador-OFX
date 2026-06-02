@@ -1,12 +1,12 @@
-package com.example.sistemafinancas.controller;
+package com.example.finsight.controller;
 
-import com.example.sistemafinancas.model.Perfil;
-import com.example.sistemafinancas.model.Transacao;
-import com.example.sistemafinancas.model.TipoTransacao;
-import com.example.sistemafinancas.model.Usuario;
-import com.example.sistemafinancas.repository.TransacaoRepository;
-import com.example.sistemafinancas.service.TransacaoService;
-import com.example.sistemafinancas.service.UsuarioService;
+import com.example.finsight.model.Perfil;
+import com.example.finsight.model.Transacao;
+import com.example.finsight.model.TipoTransacao;
+import com.example.finsight.model.Usuario;
+import com.example.finsight.repository.TransacaoRepository;
+import com.example.finsight.service.TransacaoService;
+import com.example.finsight.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

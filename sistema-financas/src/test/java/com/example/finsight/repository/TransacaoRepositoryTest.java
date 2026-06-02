@@ -1,8 +1,8 @@
-package com.example.sistemafinancas.repository;
+package com.example.finsight.repository;
 
-import com.example.sistemafinancas.model.TipoTransacao;
-import com.example.sistemafinancas.model.Transacao;
-import com.example.sistemafinancas.model.Usuario;
+import com.example.finsight.model.TipoTransacao;
+import com.example.finsight.model.Transacao;
+import com.example.finsight.model.Usuario;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

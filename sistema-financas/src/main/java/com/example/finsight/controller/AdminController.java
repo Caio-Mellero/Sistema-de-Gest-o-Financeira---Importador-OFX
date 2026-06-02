@@ -1,9 +1,9 @@
-package com.example.sistemafinancas.controller;
+package com.example.finsight.controller;
 
-import com.example.sistemafinancas.model.Perfil;
-import com.example.sistemafinancas.model.Usuario;
-import com.example.sistemafinancas.repository.TransacaoRepository;
-import com.example.sistemafinancas.repository.UsuarioRepository;
+import com.example.finsight.model.Perfil;
+import com.example.finsight.model.Usuario;
+import com.example.finsight.repository.TransacaoRepository;
+import com.example.finsight.repository.UsuarioRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

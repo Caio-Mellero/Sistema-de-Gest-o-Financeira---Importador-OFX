@@ -11,10 +11,10 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>sistema-financas</artifactId>
+    <artifactId>finsight</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>sistema-financas</name>
-    <description>sistema-financas</description>
+    <name>FinSight</name>
+    <description>FinSight - Sistema Inteligente de Gestão Financeira com Importador OFX</description>
 
     <properties>
         <java.version>21</java.version>

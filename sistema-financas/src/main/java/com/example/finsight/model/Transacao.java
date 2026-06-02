@@ -1,4 +1,4 @@
-package com.example.sistemafinancas.model;
+package com.example.finsight.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
