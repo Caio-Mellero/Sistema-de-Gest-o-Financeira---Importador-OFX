@@ -1,8 +1,8 @@
-package com.example.sistemafinancas.service;
+package com.example.finsight.service;
 
-import com.example.sistemafinancas.model.Perfil;
-import com.example.sistemafinancas.model.Usuario;
-import com.example.sistemafinancas.repository.UsuarioRepository;
+import com.example.finsight.model.Perfil;
+import com.example.finsight.model.Usuario;
+import com.example.finsight.repository.UsuarioRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

@@ -1,6 +1,6 @@
-package com.example.sistemafinancas.repository;
+package com.example.finsight.repository;
 
-import com.example.sistemafinancas.model.Usuario;
+import com.example.finsight.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

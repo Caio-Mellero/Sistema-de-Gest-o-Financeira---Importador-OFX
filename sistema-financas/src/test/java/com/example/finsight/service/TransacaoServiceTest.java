@@ -1,8 +1,8 @@
-package com.example.sistemafinancas.service;
+package com.example.finsight.service;
 
-import com.example.sistemafinancas.model.TipoTransacao;
-import com.example.sistemafinancas.model.Transacao;
-import com.example.sistemafinancas.repository.TransacaoRepository;
+import com.example.finsight.model.TipoTransacao;
+import com.example.finsight.model.Transacao;
+import com.example.finsight.repository.TransacaoRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

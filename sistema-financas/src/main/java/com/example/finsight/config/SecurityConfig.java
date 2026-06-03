@@ -1,4 +1,4 @@
-package com.example.sistemafinancas.config;
+package com.example.finsight.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
